@@ -1,0 +1,65 @@
+package com.iManager.im.db.api.model;
+
+import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Entity
+public class SubProject {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+    @Column(nullable = false,unique = true)
+    private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "project_id",nullable = false)
+    private Project project;
+
+    @OneToMany(mappedBy = "subProject",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Tasks> tasks = new ArrayList<>();
+
+    public SubProject() {
+    }
+
+    public SubProject(UUID id, String name, Project project, List<Tasks> tasks) {
+        this.id = id;
+        this.name = name;
+        this.project = project;
+        this.tasks = tasks;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public List<Tasks> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(List<Tasks> tasks) {
+        this.tasks = tasks;
+    }
+}

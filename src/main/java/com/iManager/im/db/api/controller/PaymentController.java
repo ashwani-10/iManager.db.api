@@ -7,8 +7,10 @@ import com.iManager.im.db.api.model.Organization;
 import com.iManager.im.db.api.model.Payment;
 import com.iManager.im.db.api.repository.OrgRepository;
 import com.iManager.im.db.api.repository.PaymentRepository;
+import com.iManager.im.db.api.requestDTO.OrgRequestDTO;
 import com.iManager.im.db.api.service.KafkaProducerService;
 import com.iManager.im.db.api.service.MessageProducer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,8 +41,11 @@ public class PaymentController {
     }
 
     @KafkaListener(topics = {"Payment-Success"},groupId = "springboot-group-1")
-    public ResponseEntity successPayment(String message) throws JsonProcessingException {
-        String orderId = message.replace("\"", "");
+    public ResponseEntity successPayment(ConsumerRecord<String, String> record) throws JsonProcessingException {
+        String key = record.key();
+        String amount = record.value();
+
+        String orderId = key;
         System.out.println(orderId);
         Payment payment = paymentRepo.findByOrderId(orderId)
                 .orElseThrow(()-> new RuntimeException("There is no such payment with this order_id: "+orderId));
@@ -59,8 +64,11 @@ public class PaymentController {
         org.setOrderId(orderId);
         orgRepository.save(org);
 
+        OrgRequestDTO orgRequestDTO = objectMapper.convertValue(org, OrgRequestDTO.class);
+        orgRequestDTO.setAmount(amount);
+
         try{
-        messageProducer.sendToTopic(org);
+        messageProducer.paymentConfirmation(orgRequestDTO);
         }catch (Exception e){
             System.out.println("Failure sending payment confirmation email");
         }

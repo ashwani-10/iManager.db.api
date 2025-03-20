@@ -1,5 +1,6 @@
 package com.iManager.im.db.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.iManager.im.db.api.enums.Subscription;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -9,14 +10,12 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Data
-@Builder
 public class Organization {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false,unique = true)
     private String name;
 
     @Column(nullable = false,unique = true)
@@ -116,3 +115,8 @@ public class Organization {
         this.orderId = orderId;
     }
 }
+
+//Organization org = findByEmail(orgEamil);
+//String orderId = org.getOrderId();
+//
+//Payment payment = findByOrderId(orderId);

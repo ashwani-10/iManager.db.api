@@ -3,14 +3,14 @@ package com.iManager.im.db.api.model;
 import com.iManager.im.db.api.enums.Priority;
 import com.iManager.im.db.api.enums.TaskStatus;
 import jakarta.persistence.*;
-import lombok.Data;
+
+import java.util.UUID;
 
 @Entity
-@Data
 public class Tasks {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
     @Column(nullable = false)
     private String title;
 
@@ -22,15 +22,79 @@ public class Tasks {
     private Priority priority;
 
     @ManyToOne
-    @JoinColumn(name = "project_id")
-    private Project project;
+    @JoinColumn(name = "SubProject_id")
+    private SubProject subProject;
 
     @ManyToOne
-    @JoinColumn(name = "assigned_to")
-    private User assignedTo;
+    @JoinColumn(name = "user_id")
+    private User assignedUser;
 
-    @ManyToOne
-    @JoinColumn(name = "created_by")
-    private User createdBy;
+    public Tasks() {
+    }
+    public Tasks(UUID id, String title, String description, TaskStatus status,
+                 Priority priority, SubProject subProject, User assignedUser) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        this.priority = priority;
+        this.subProject = subProject;
+        this.assignedUser = assignedUser;
+    }
 
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public TaskStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TaskStatus status) {
+        this.status = status;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
+
+    public SubProject getSubProject() {
+        return subProject;
+    }
+
+    public void setSubProject(SubProject subProject) {
+        this.subProject = subProject;
+    }
+
+    public User getAssignedUser() {
+        return assignedUser;
+    }
+
+    public void setAssignedUser(User assignedUser) {
+        this.assignedUser = assignedUser;
+    }
 }
