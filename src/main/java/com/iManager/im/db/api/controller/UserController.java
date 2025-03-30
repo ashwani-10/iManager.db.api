@@ -2,16 +2,23 @@ package com.iManager.im.db.api.controller;
 
 import com.iManager.im.db.api.enums.Role;
 import com.iManager.im.db.api.model.Organization;
+import com.iManager.im.db.api.model.Roles;
+import com.iManager.im.db.api.model.SubProject;
 import com.iManager.im.db.api.model.User;
 import com.iManager.im.db.api.repository.OrgRepository;
+import com.iManager.im.db.api.repository.RoleRepository;
+import com.iManager.im.db.api.repository.SubProjectRepository;
 import com.iManager.im.db.api.repository.UserRepository;
 import com.iManager.im.db.api.requestDTO.UserRequestDTO;
+import com.iManager.im.db.api.responseDTO.UserResponseDTO;
 import com.iManager.im.db.api.service.MessageProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -24,6 +31,10 @@ public class UserController {
     OrgRepository orgRepository;
     @Autowired
     MessageProducer messageProducer;
+    @Autowired
+    RoleRepository roleRepository;
+    @Autowired
+    SubProjectRepository subProjectRepository;
 
     @PostMapping("create")
     public ResponseEntity createUser(@RequestParam String userEmail,
@@ -60,5 +71,43 @@ public class UserController {
         }catch (Exception e){
             return new ResponseEntity("Failed finalizing User",HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/get/{userEmail}")
+    public ResponseEntity getUser(@PathVariable String userEmail){
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        UserRequestDTO requestDTO = new UserRequestDTO();
+        requestDTO.setId(user.getId());
+        requestDTO.setEmail(user.getEmail());
+        requestDTO.setName(user.getName());
+        requestDTO.setPassword(user.getPassword());
+        requestDTO.setRole(user.getRole());
+        requestDTO.setOrgId(user.getOrganization().getId());
+        return ResponseEntity.ok(requestDTO);
+    }
+
+    @PostMapping("/add/role/{subProjectId}/{userId}/{roleId}")
+    public ResponseEntity addUserRole(@PathVariable UUID subProjectId,
+                                      @PathVariable UUID userId,
+                                      @PathVariable UUID roleId){
+        Roles role = roleRepository.findById(roleId).orElseThrow();
+        User user = userRepository.findByIdWithSubProjectRole(userId).orElseThrow();
+        Map<UUID,Roles> rolesMap = user.getSubProjectRole();
+        rolesMap.put(subProjectId,role);
+        userRepository.save(user);
+        SubProject subProject = subProjectRepository.findByIdWithUsers(subProjectId).orElseThrow();
+        List<User> userList = subProject.getMembers();
+        userList.add(user);
+        subProject.setMembers(userList);
+        subProjectRepository.save(subProject);
+        UserResponseDTO responseDTO = new UserResponseDTO();
+        responseDTO.setId(user.getId());
+        responseDTO.setName(user.getName());
+        responseDTO.setEmail(user.getEmail());
+        if(rolesMap.containsKey(subProjectId)){
+            responseDTO.setProjectRole(rolesMap.get(subProjectId).getName());
+        }
+
+        return ResponseEntity.ok(responseDTO);
     }
 }

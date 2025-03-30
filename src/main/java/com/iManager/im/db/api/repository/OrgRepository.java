@@ -16,5 +16,13 @@ public interface OrgRepository extends JpaRepository<Organization, UUID> {
     @Query("SELECT o FROM Organization o LEFT JOIN FETCH o.projects WHERE o.id = :id")
     Optional<Organization> findByIdWithProjects(@Param("id") UUID id);
 
+    @Query("SELECT o FROM Organization o LEFT JOIN FETCH o.roles WHERE o.id = :id")
+    Optional<Organization> findByIdWithRoles(@Param("id") UUID id);
+
+    @Query("SELECT o FROM Organization o LEFT JOIN FETCH o.users WHERE o.id = :id")
+    Optional<Organization> findByIdWithUsers(@Param("id") UUID id);
+
+
+
 
 }

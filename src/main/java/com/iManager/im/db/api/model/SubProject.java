@@ -21,14 +21,26 @@ public class SubProject {
     @OneToMany(mappedBy = "subProject",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Tasks> tasks = new ArrayList<>();
 
+    @OneToMany(mappedBy = "subProject",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Status> statusList;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "members",
+            joinColumns = @JoinColumn(name = "subProject_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private List<User> members;
+
     public SubProject() {
     }
 
-    public SubProject(UUID id, String name, Project project, List<Tasks> tasks) {
+    public SubProject(UUID id, String name, Project project, List<Tasks> tasks,
+                      List<Status> statusList, List<User> members) {
         this.id = id;
         this.name = name;
         this.project = project;
         this.tasks = tasks;
+        this.statusList = statusList;
+        this.members = members;
     }
 
     public UUID getId() {
@@ -61,5 +73,21 @@ public class SubProject {
 
     public void setTasks(List<Tasks> tasks) {
         this.tasks = tasks;
+    }
+
+    public List<Status> getStatusList() {
+        return statusList;
+    }
+
+    public void setStatusList(List<Status> statusList) {
+        this.statusList = statusList;
+    }
+
+    public List<User> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<User> members) {
+        this.members = members;
     }
 }

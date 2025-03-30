@@ -1,34 +1,32 @@
 package com.iManager.im.db.api.requestDTO;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.iManager.im.db.api.enums.Role;
 import com.iManager.im.db.api.enums.Subscription;
-import lombok.Data;
 import lombok.NonNull;
-import org.apache.kafka.common.protocol.types.Field;
 
 import java.util.UUID;
 
-@Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrgRequestDTO {
-    @NonNull
     UUID id;
-    @NonNull
     String name;
-    @NonNull
     String email;
-    @NonNull
     String password;
-    @NonNull
+    Role role;
     Subscription subscription;
     String amount;
 
     public OrgRequestDTO() {
     }
 
-    public OrgRequestDTO(@NonNull UUID id, @NonNull String name, @NonNull String email, @NonNull String password, @NonNull Subscription subscription, String amount) {
+    public OrgRequestDTO(UUID id, String name, String email, String password,
+                         Role role, Subscription subscription, String amount) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
+        this.role = role;
         this.subscription = subscription;
         this.amount = amount;
     }
@@ -79,5 +77,13 @@ public class OrgRequestDTO {
 
     public void setId(@NonNull UUID id) {
         this.id = id;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

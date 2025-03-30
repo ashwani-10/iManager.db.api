@@ -1,6 +1,5 @@
 package com.iManager.im.db.api.responseDTO;
 
-import java.util.List;
 import java.util.UUID;
 
 public class TaskResponseDTO {

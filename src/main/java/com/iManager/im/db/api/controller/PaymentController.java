@@ -3,6 +3,7 @@ package com.iManager.im.db.api.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iManager.im.db.api.enums.PaymentStatus;
+import com.iManager.im.db.api.enums.Role;
 import com.iManager.im.db.api.model.Organization;
 import com.iManager.im.db.api.model.Payment;
 import com.iManager.im.db.api.repository.OrgRepository;
@@ -62,6 +63,7 @@ public class PaymentController {
         String orgData = payment.getOrgData();
         Organization org = objectMapper.readValue(orgData, Organization.class);
         org.setOrderId(orderId);
+        org.setRole(Role.ADMIN);
         orgRepository.save(org);
 
         OrgRequestDTO orgRequestDTO = objectMapper.convertValue(org, OrgRequestDTO.class);

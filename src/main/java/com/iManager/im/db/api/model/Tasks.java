@@ -1,7 +1,6 @@
 package com.iManager.im.db.api.model;
 
 import com.iManager.im.db.api.enums.Priority;
-import com.iManager.im.db.api.enums.TaskStatus;
 import jakarta.persistence.*;
 
 import java.util.UUID;
@@ -15,8 +14,10 @@ public class Tasks {
     private String title;
 
     private String description;
-    @Enumerated(EnumType.STRING)
-    private TaskStatus status;
+
+    @OneToOne
+    @JoinColumn(name = "status_id")
+    private Status status;
 
     @Enumerated(EnumType.STRING)
     private Priority priority;
@@ -31,7 +32,7 @@ public class Tasks {
 
     public Tasks() {
     }
-    public Tasks(UUID id, String title, String description, TaskStatus status,
+    public Tasks(UUID id, String title, String description, Status status,
                  Priority priority, SubProject subProject, User assignedUser) {
         this.id = id;
         this.title = title;
@@ -66,11 +67,11 @@ public class Tasks {
         this.description = description;
     }
 
-    public TaskStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(TaskStatus status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

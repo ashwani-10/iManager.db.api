@@ -1,15 +1,18 @@
 package com.iManager.im.db.api.controller;
 
+import com.iManager.im.db.api.enums.Role;
 import com.iManager.im.db.api.model.Organization;
+import com.iManager.im.db.api.model.User;
 import com.iManager.im.db.api.repository.OrgRepository;
-import org.apache.kafka.common.protocol.types.Field;
+import com.iManager.im.db.api.requestDTO.OrgRequestDTO;
+import com.iManager.im.db.api.responseDTO.UserResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,6 +28,7 @@ public class OrgController {
                                           ){
         try{
             System.out.println("/inside db app");
+            org.setRole(Role.ADMIN);
             orgRepository.save(org);
             System.out.println("org created successfully");
             return new ResponseEntity<>("Org registered successfully", HttpStatus.CREATED);
@@ -39,12 +43,17 @@ public class OrgController {
         System.out.println("endpoint hi ho gaya hai");
         if(org.isPresent()){
             Organization organization = org.get();
-            organization.setUsers(new ArrayList<>());
-            organization.setProjects(new ArrayList<>());
+            OrgRequestDTO orgRequestDTO = new OrgRequestDTO();
+            orgRequestDTO.setId(organization.getId());
+            orgRequestDTO.setName(organization.getName());
+            orgRequestDTO.setRole(organization.getRole());
+            orgRequestDTO.setEmail(organization.getEmail());
+            orgRequestDTO.setPassword(organization.getPassword());
 
-            return new ResponseEntity<>(organization, HttpStatus.OK);
+            return new ResponseEntity<>(orgRequestDTO, HttpStatus.OK);
         }else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            OrgRequestDTO requestDTO = null;
+            return new ResponseEntity<>(requestDTO,HttpStatus.OK);
         }
     }
 
@@ -59,7 +68,7 @@ public class OrgController {
 
             return new ResponseEntity<>(organization, HttpStatus.OK);
         }else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("null",HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -68,6 +77,27 @@ public class OrgController {
         String resp = "Docker connected with db";
         System.out.println(resp);
         return new ResponseEntity(resp, HttpStatus.OK);
+    }
+
+    @GetMapping("/users/{orgId}")
+    public ResponseEntity getMembers(@PathVariable UUID orgId){
+        Optional<Organization> org = orgRepository.findByIdWithUsers(orgId);
+        System.out.println("endpoint hit ho gaya hai");
+        if(org.isPresent()){
+            Organization organization = org.get();
+            List<User> users = organization.getUsers();
+            List<UserResponseDTO> responseDTOList = new ArrayList<>();
+            for(User user : users){
+                UserResponseDTO responseDTO = new UserResponseDTO();
+                responseDTO.setId(user.getId());
+                responseDTO.setName(user.getName());
+                responseDTO.setEmail(user.getEmail());
+                responseDTOList.add(responseDTO);
+            }
+            return new ResponseEntity<>(responseDTOList, HttpStatus.OK);
+        }else {
+            return new ResponseEntity<>("null",HttpStatus.UNAUTHORIZED);
+        }
     }
 }
 

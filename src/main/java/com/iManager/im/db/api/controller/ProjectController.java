@@ -68,10 +68,7 @@ public class ProjectController {
                     .orElseThrow(()-> new RuntimeException("Project does not exists"));
             project.setName(projectRequestDTO.getName());
             projectRepository.save(project);
-            ProjectResponseDTO responseDTO = new ProjectResponseDTO();
-            responseDTO.setId(project.getId());
-            responseDTO.setName(project.getName());
-            return new ResponseEntity<Object>(responseDTO,HttpStatus.CREATED);
+            return new ResponseEntity<Object>("project updated successfully",HttpStatus.CREATED);
         }catch (Exception e){
             System.out.println("Failed updating project");
             return new ResponseEntity("Failed updating",HttpStatus.INTERNAL_SERVER_ERROR);

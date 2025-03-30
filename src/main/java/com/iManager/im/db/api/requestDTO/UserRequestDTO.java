@@ -1,48 +1,77 @@
 package com.iManager.im.db.api.requestDTO;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.iManager.im.db.api.enums.Role;
-import lombok.Data;
-import lombok.NonNull;
 
-@Data
+import java.util.UUID;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserRequestDTO {
-    @NonNull
+    UUID id;
     String name;
-    @NonNull
     String Email;
-    @NonNull
     String password;
+    Role role;
+    UUID orgId;
 
     public UserRequestDTO() {
     }
 
-    public @NonNull String getName() {
+    public UserRequestDTO(UUID id, String name, String email, String password,
+                          Role role, UUID orgId) {
+        this.id = id;
+        this.name = name;
+        Email = email;
+        this.password = password;
+        this.role = role;
+        this.orgId = orgId;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getName() {
         return name;
     }
 
-    public void setName(@NonNull String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public @NonNull String getEmail() {
+    public String getEmail() {
         return Email;
     }
 
-    public void setEmail(@NonNull String email) {
+    public void setEmail(String email) {
         Email = email;
     }
 
-    public @NonNull String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(@NonNull String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
-    public UserRequestDTO(@NonNull String name, @NonNull String email, @NonNull String password) {
-        this.name = name;
-        Email = email;
-        this.password = password;
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public UUID getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(UUID orgId) {
+        this.orgId = orgId;
     }
 }

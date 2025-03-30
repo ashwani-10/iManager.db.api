@@ -1,14 +1,15 @@
 package com.iManager.im.db.api.requestDTO;
 
-import java.util.List;
 import java.util.UUID;
 
 public class TaskRequestDTO {
+    private UUID id;
+
     private String title;
 
     private String description;
 
-    private String status;
+    private UUID statusId;
 
     private String priority;
 
@@ -19,11 +20,12 @@ public class TaskRequestDTO {
     public TaskRequestDTO() {
     }
 
-    public TaskRequestDTO(String title, String description, String status, String priority,
-                          UUID assignedUser, UUID subProjectID) {
+    public TaskRequestDTO(UUID id, String title, String description,
+                          UUID statusId, String priority, UUID assignedUser, UUID subProjectID) {
+        this.id = id;
         this.title = title;
         this.description = description;
-        this.status = status;
+        this.statusId = statusId;
         this.priority = priority;
         this.assignedUser = assignedUser;
         this.subProjectID = subProjectID;
@@ -45,14 +47,6 @@ public class TaskRequestDTO {
         this.description = description;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getPriority() {
         return priority;
     }
@@ -69,11 +63,31 @@ public class TaskRequestDTO {
         this.assignedUser = assignedUser;
     }
 
+    public UUID getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(UUID statusId) {
+        this.statusId = statusId;
+    }
+
     public UUID getSubProjectID() {
         return subProjectID;
     }
 
     public void setSubProjectID(UUID subProjectID) {
         this.subProjectID = subProjectID;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public void setAssignedUser(UUID assignedUser) {
+        this.assignedUser = assignedUser;
     }
 }
