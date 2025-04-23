@@ -2,6 +2,7 @@ package com.iManager.im.db.api.model;
 
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -12,21 +13,24 @@ public class Project {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false)
     private String name;
 
     @ManyToOne
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
+    @Column(nullable = false)
+    private Instant createdAt;
+
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubProject> subProjects;
 
-    public Project(UUID id, String name, Organization organization,
-                   List<SubProject> subProjects) {
+    public Project(UUID id, String name, Organization organization, Instant createdAt, List<SubProject> subProjects) {
         this.id = id;
         this.name = name;
         this.organization = organization;
+        this.createdAt = createdAt;
         this.subProjects = subProjects;
     }
 
@@ -63,5 +67,13 @@ public class Project {
 
     public void setSubProjects(List<SubProject> subProjects) {
         this.subProjects = subProjects;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 }

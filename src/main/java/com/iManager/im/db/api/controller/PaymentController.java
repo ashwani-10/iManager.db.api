@@ -9,7 +9,6 @@ import com.iManager.im.db.api.model.Payment;
 import com.iManager.im.db.api.repository.OrgRepository;
 import com.iManager.im.db.api.repository.PaymentRepository;
 import com.iManager.im.db.api.requestDTO.OrgRequestDTO;
-import com.iManager.im.db.api.service.KafkaProducerService;
 import com.iManager.im.db.api.service.MessageProducer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("db/api/payment")

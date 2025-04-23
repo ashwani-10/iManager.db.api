@@ -27,10 +27,10 @@ public class User{
     @OneToMany
     @JoinTable(
             name = "user_subProject_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
+            joinColumns = @JoinColumn(name = "user_id",unique = false),
+            inverseJoinColumns = @JoinColumn(name = "role_id",unique = false)
     )
-    @MapKeyColumn(name = "subProject_id") // Key column for the map
+    @MapKeyColumn(name = "subProject_id",unique = false) // Key column for the map
     private Map<UUID, Roles> subProjectRole;
 
     @ManyToOne

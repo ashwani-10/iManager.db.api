@@ -13,19 +13,30 @@ public class UserRequestDTO {
     String password;
     Role role;
     UUID orgId;
+    String orgName;
 
     public UserRequestDTO() {
     }
 
     public UserRequestDTO(UUID id, String name, String email, String password,
-                          Role role, UUID orgId) {
+                          Role role, UUID orgId, String orgName) {
         this.id = id;
         this.name = name;
         Email = email;
         this.password = password;
         this.role = role;
         this.orgId = orgId;
+        this.orgName = orgName;
     }
+
+    public String getOrgName() {
+        return orgName;
+    }
+
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    }
+
 
     public UUID getId() {
         return id;

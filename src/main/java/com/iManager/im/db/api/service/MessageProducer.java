@@ -2,6 +2,7 @@ package com.iManager.im.db.api.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.iManager.im.db.api.exceptions.FailureProducingMessage;
+import com.iManager.im.db.api.kafkaMessageDTO.TaskAssignedMessageDTO;
 import com.iManager.im.db.api.model.Organization;
 import com.iManager.im.db.api.requestDTO.OrgRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,28 @@ public class MessageProducer {
             }catch (Exception e) {
                 if (retries == 0) {
                     throw new FailureProducingMessage("Failed to send registration email after 3 retries", e);
+                }
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    throw new FailureProducingMessage("Email sending Interrupted", ex);
+                }
+            }
+        }
+    }
+
+    public void taskAssignee(TaskAssignedMessageDTO messageDTO) throws JsonProcessingException {
+        final String topic = "task-events";
+        int retries = 3;
+
+        while (retries-- > 0) {
+            try {
+                kafkaProducer.produceMessage(messageDTO,"assignee-mail",topic);
+                return;
+            }catch (Exception e) {
+                if (retries == 0) {
+                    throw new FailureProducingMessage("Failed to send task assignee email after 3 retries", e);
                 }
                 try {
                     Thread.sleep(2000);

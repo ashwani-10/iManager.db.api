@@ -2,6 +2,7 @@ package com.iManager.im.db.api.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -20,14 +21,23 @@ public class Roles {
     @JoinColumn(name = "org_id", nullable = false)
     private Organization organization;
 
+    @ManyToMany
+    @JoinTable(
+            name = "role_operations",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "operation_id")
+    )
+    private List<Operation> operations;
+
     public Roles() {
     }
 
-    public Roles(UUID id, String name, String description, Organization organization) {
+    public Roles(UUID id, String name, String description, Organization organization, List<Operation> operations) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.organization = organization;
+        this.operations = operations;
     }
 
     public UUID getId() {
@@ -60,5 +70,13 @@ public class Roles {
 
     public void setOrganization(Organization organization) {
         this.organization = organization;
+    }
+
+    public List<Operation> getOperations() {
+        return operations;
+    }
+
+    public void setOperations(List<Operation> operations) {
+        this.operations = operations;
     }
 }

@@ -36,7 +36,7 @@ public class UserController {
     @Autowired
     SubProjectRepository subProjectRepository;
 
-    @PostMapping("create")
+    @PostMapping("/create")
     public ResponseEntity createUser(@RequestParam String userEmail,
                                      @RequestParam String userRole,
                                      @RequestParam String orgId){
@@ -83,6 +83,8 @@ public class UserController {
         requestDTO.setPassword(user.getPassword());
         requestDTO.setRole(user.getRole());
         requestDTO.setOrgId(user.getOrganization().getId());
+        Organization organization = orgRepository.findById(user.getOrganization().getId()).orElseThrow();
+        requestDTO.setOrgName(organization.getName());
         return ResponseEntity.ok(requestDTO);
     }
 
@@ -107,7 +109,6 @@ public class UserController {
         if(rolesMap.containsKey(subProjectId)){
             responseDTO.setProjectRole(rolesMap.get(subProjectId).getName());
         }
-
         return ResponseEntity.ok(responseDTO);
     }
 }

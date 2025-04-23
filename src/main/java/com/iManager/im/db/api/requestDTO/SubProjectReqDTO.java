@@ -10,14 +10,16 @@ public class SubProjectReqDTO {
     private UUID id;
     private String name;
     private UUID projectId;
+    private String repoName;
 
     public SubProjectReqDTO() {
     }
 
-    public SubProjectReqDTO(UUID id, String name, UUID projectId) {
+    public SubProjectReqDTO(UUID id, String name, UUID projectId,String repoName) {
         this.id = id;
         this.name = name;
         this.projectId = projectId;
+        this.repoName = repoName;
     }
 
     public UUID getId() {
@@ -42,5 +44,13 @@ public class SubProjectReqDTO {
 
     public void setProjectId(UUID projectId) {
         this.projectId = projectId;
+    }
+
+    public String getRepoName() {
+        return repoName;
+    }
+
+    public void setRepoName(String repoName) {
+        this.repoName = repoName;
     }
 }

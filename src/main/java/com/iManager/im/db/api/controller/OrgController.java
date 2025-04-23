@@ -6,6 +6,7 @@ import com.iManager.im.db.api.model.User;
 import com.iManager.im.db.api.repository.OrgRepository;
 import com.iManager.im.db.api.requestDTO.OrgRequestDTO;
 import com.iManager.im.db.api.responseDTO.UserResponseDTO;
+import com.iManager.im.db.api.service.MessageProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,8 @@ public class OrgController {
 
     @Autowired
     OrgRepository orgRepository;
+    @Autowired
+    MessageProducer messageProducer;
 
     @PostMapping("/registration")
     public ResponseEntity orgRegistration(@RequestBody Organization org
@@ -37,6 +40,31 @@ public class OrgController {
             return new ResponseEntity<>("registration failed",HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PostMapping("/upload/logo/{orgId}")
+    public ResponseEntity uploadLogo(@PathVariable UUID orgId,
+                                     @RequestParam String logoUrl){
+        try{
+            Organization org = orgRepository.findById(orgId).orElseThrow();
+            org.setLogoUrl(logoUrl);
+            orgRepository.save(org);
+            return ResponseEntity.ok("logo uploaded");
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/get/logo/{orgId}")
+    public ResponseEntity getLogo(@PathVariable UUID orgId){
+        try{
+            Organization org = orgRepository.findById(orgId).orElseThrow();
+            String logoUrl = org.getLogoUrl();
+            return ResponseEntity.ok(logoUrl);
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @GetMapping("/get")
     public ResponseEntity getOrganization(@RequestParam String orgEmail){
         Optional<Organization> org = orgRepository.findByEmail(orgEmail);
@@ -88,11 +116,13 @@ public class OrgController {
             List<User> users = organization.getUsers();
             List<UserResponseDTO> responseDTOList = new ArrayList<>();
             for(User user : users){
-                UserResponseDTO responseDTO = new UserResponseDTO();
-                responseDTO.setId(user.getId());
-                responseDTO.setName(user.getName());
-                responseDTO.setEmail(user.getEmail());
-                responseDTOList.add(responseDTO);
+                if(user.isActive()) {
+                    UserResponseDTO responseDTO = new UserResponseDTO();
+                    responseDTO.setId(user.getId());
+                    responseDTO.setName(user.getName());
+                    responseDTO.setEmail(user.getEmail());
+                    responseDTOList.add(responseDTO);
+                }
             }
             return new ResponseEntity<>(responseDTOList, HttpStatus.OK);
         }else {

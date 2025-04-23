@@ -31,6 +31,9 @@ public class Organization {
     @Column(name = "order_id",nullable = false)
     String orderId;
 
+    @Column(name = "github_token")
+    String githubToken;
+
     @OneToMany(mappedBy = "organization",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<User> users;
 
@@ -40,12 +43,15 @@ public class Organization {
     @OneToMany(mappedBy = "organization",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Roles> roles;
 
+    @Column(name = "logo_url")
+    private String logoUrl;
+
     public Organization() {
     }
 
     public Organization(UUID id, String name, String email, String password, Subscription subscription,
                         Role role, String orderId, List<User> users, List<Project> projects,
-                        List<Roles> roles) {
+                        List<Roles> roles,String githubToken,String logoUrl) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -56,6 +62,16 @@ public class Organization {
         this.users = users;
         this.projects = projects;
         this.roles = roles;
+        this.githubToken = githubToken;
+        this.logoUrl = logoUrl;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
     }
 
     public UUID getId() {
@@ -136,6 +152,14 @@ public class Organization {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public String getGithubToken() {
+        return githubToken;
+    }
+
+    public void setGithubToken(String githubToken) {
+        this.githubToken = githubToken;
     }
 }
 

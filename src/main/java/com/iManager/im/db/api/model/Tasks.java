@@ -3,6 +3,7 @@ package com.iManager.im.db.api.model;
 import com.iManager.im.db.api.enums.Priority;
 import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -10,12 +11,16 @@ public class Tasks {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+
+    @Column(nullable = false)
+    private String ticketId;
+
     @Column(nullable = false)
     private String title;
 
     private String description;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "status_id")
     private Status status;
 
@@ -30,10 +35,16 @@ public class Tasks {
     @JoinColumn(name = "user_id")
     private User assignedUser;
 
+    @OneToMany(mappedBy = "task",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Comment> comments;
+
     public Tasks() {
     }
-    public Tasks(UUID id, String title, String description, Status status,
-                 Priority priority, SubProject subProject, User assignedUser) {
+
+    public Tasks(UUID id, String title, String description,
+                 Status status, Priority priority, SubProject subProject,
+                 User assignedUser, List<Comment> comments,
+                 String ticketId) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -41,6 +52,8 @@ public class Tasks {
         this.priority = priority;
         this.subProject = subProject;
         this.assignedUser = assignedUser;
+        this.comments = comments;
+        this.ticketId = ticketId;
     }
 
     public UUID getId() {
@@ -97,5 +110,21 @@ public class Tasks {
 
     public void setAssignedUser(User assignedUser) {
         this.assignedUser = assignedUser;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public String getTicketId() {
+        return ticketId;
+    }
+
+    public void setTicketId(String ticketId) {
+        this.ticketId = ticketId;
     }
 }

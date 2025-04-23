@@ -1,16 +1,12 @@
 package com.iManager.im.db.api.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.iManager.im.db.api.model.Project;
-import com.iManager.im.db.api.model.Roles;
-import com.iManager.im.db.api.model.SubProject;
-import com.iManager.im.db.api.model.User;
-import com.iManager.im.db.api.repository.ProjectRepository;
-import com.iManager.im.db.api.repository.SubProjectRepository;
-import com.iManager.im.db.api.repository.UserRepository;
+import com.iManager.im.db.api.model.*;
+import com.iManager.im.db.api.repository.*;
 import com.iManager.im.db.api.requestDTO.SubProjectReqDTO;
 import com.iManager.im.db.api.responseDTO.SubProjectResDTO;
 import com.iManager.im.db.api.responseDTO.UserResponseDTO;
+import com.iManager.im.db.api.service.GithubAuthService;
+import com.iManager.im.db.api.utils.ValidateAuth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,27 +22,47 @@ public class SubProjectController {
     @Autowired
     ProjectRepository projectRepository;
     @Autowired
-    ObjectMapper objectMapper;
-    @Autowired
     UserRepository userRepository;
+    @Autowired
+    OperationRepository operationRepository;
+    @Autowired
+    ValidateAuth validateAuth;
+    @Autowired
+    GithubAuthService githubAuthService;
+    @Autowired
+    OrgRepository orgRepository;
 
-    @PostMapping("/create")
-    public ResponseEntity createSubProject(@RequestBody SubProjectReqDTO requestDTO){
-        try {
-            Project project = projectRepository.findById(requestDTO.getProjectId())
-                    .orElseThrow(() -> new RuntimeException("Project does not exists"));
-            SubProject subProject = new SubProject();
-            subProject.setName(requestDTO.getName());
-            subProject.setProject(project);
-            subProjectRepository.save(subProject);
-            SubProjectResDTO responseDTO = new SubProjectResDTO();
-            responseDTO.setId(subProject.getId());
-            responseDTO.setName(subProject.getName());
-            return new ResponseEntity<Object>(responseDTO, HttpStatus.CREATED);
-        }catch (Exception e){
-            System.out.println("Failed creating subProject");
-            return new ResponseEntity("Failed creating subProject",HttpStatus.INTERNAL_SERVER_ERROR);
+    @PostMapping("/create/{loggedId}")
+    public ResponseEntity createSubProject(@PathVariable String loggedId,
+                                           @RequestBody SubProjectReqDTO requestDTO) {
+
+        UUID opId = UUID.fromString("0f4d0915-4fdf-42c3-b560-d9601ba7b5d9");
+        Operation operation = operationRepository.findById(opId).orElseThrow();
+
+        if (validateAuth.validateUser(loggedId,operation)) {
+            try {
+                Optional<Organization> organization = orgRepository.findByEmail(loggedId);
+                if(requestDTO.getRepoName() != null) {
+                    githubAuthService.addWebhookToRepo(requestDTO.getRepoName(), organization.get().getGithubToken());
+                }
+
+                Project project = projectRepository.findById(requestDTO.getProjectId())
+                        .orElseThrow(() -> new RuntimeException("Project does not exists"));
+                SubProject subProject = new SubProject();
+                subProject.setName(requestDTO.getName());
+                subProject.setProject(project);
+                subProjectRepository.save(subProject);
+
+                SubProjectResDTO responseDTO = new SubProjectResDTO();
+                responseDTO.setId(subProject.getId());
+                responseDTO.setName(subProject.getName());
+                return new ResponseEntity<Object>(responseDTO, HttpStatus.CREATED);
+            } catch (Exception e) {
+                System.out.println("Failed creating subProject");
+                return new ResponseEntity("Failed creating subProject", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
+        return new ResponseEntity<>("You are not authorized for this operation",HttpStatus.UNAUTHORIZED);
     }
 
     @DeleteMapping("/delete/{subProjectId}")

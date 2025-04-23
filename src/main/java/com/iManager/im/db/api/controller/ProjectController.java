@@ -1,18 +1,18 @@
 package com.iManager.im.db.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.iManager.im.db.api.model.Organization;
-import com.iManager.im.db.api.model.Project;
-import com.iManager.im.db.api.repository.OrgRepository;
-import com.iManager.im.db.api.repository.ProjectRepository;
+import com.iManager.im.db.api.model.*;
+import com.iManager.im.db.api.repository.*;
 import com.iManager.im.db.api.requestDTO.ProjectRequestDTO;
 import com.iManager.im.db.api.responseDTO.ProjectResponseDTO;
+import com.iManager.im.db.api.utils.Mapper;
+import com.iManager.im.db.api.utils.ValidateAuth;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+
+import java.time.Instant;
+import java.util.*;
 
 @RestController
 @RequestMapping("db/api/project")
@@ -20,32 +20,57 @@ public class ProjectController {
     ProjectRepository projectRepository;
     OrgRepository orgRepository;
     ObjectMapper objectMapper;
+    OperationRepository operationRepository;
+    UserRepository userRepository;
+    RoleRepository roleRepository;
+    ValidateAuth validateAuth;
+    Mapper mapper;
 
     public ProjectController(ProjectRepository projectRepository,
                              OrgRepository orgRepository,
-                             ObjectMapper objectMapper) {
+                             ObjectMapper objectMapper,
+                             OperationRepository operationRepository,
+                             UserRepository userRepository,
+                             RoleRepository roleRepository,
+                             ValidateAuth validateAuth,
+                             Mapper mapper) {
         this.projectRepository = projectRepository;
         this.orgRepository = orgRepository;
         this.objectMapper = objectMapper;
+        this.operationRepository = operationRepository;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.validateAuth = validateAuth;
+        this.mapper = mapper;
     }
 
-    @PostMapping("/create")
-    public ResponseEntity createProject(@RequestBody ProjectRequestDTO projectRequestDTO){
-        try {
-            Organization org = orgRepository.findById(projectRequestDTO.getOrgId())
-                    .orElseThrow(() -> new RuntimeException("Org does not exists"));
-            Project project = new Project();
-            project.setName(projectRequestDTO.getName());
-            project.setOrganization(org);
-            projectRepository.save(project);
-            ProjectResponseDTO responseDTO = new ProjectResponseDTO();
-            responseDTO.setId(project.getId());
-            responseDTO.setName(project.getName());
-            return new ResponseEntity<Object>(responseDTO,HttpStatus.CREATED);
-        }catch (Exception e){
-            System.out.println("Failed creating project");
-            return new ResponseEntity("Failed creating",HttpStatus.INTERNAL_SERVER_ERROR);
+    @PostMapping("/create/{loggedId}")
+    public ResponseEntity createProject(@PathVariable String loggedId,
+                                        @RequestBody ProjectRequestDTO projectRequestDTO){
+            UUID opId = UUID.fromString("4ad91b2d-ea24-492c-979c-4d5dac9c7162");
+            Operation operation = operationRepository.findById(opId).orElseThrow();
+
+            if (validateAuth.validateUser(loggedId,operation)) {
+                try{
+                Organization org = orgRepository.findById(projectRequestDTO.getOrgId())
+                        .orElseThrow(() -> new RuntimeException("Org does not exists"));
+                Project project = new Project();
+                project.setName(projectRequestDTO.getName());
+                project.setOrganization(org);
+                project.setCreatedAt(Instant.now());
+                projectRepository.save(project);
+
+                ProjectResponseDTO responseDTO = new ProjectResponseDTO();
+                responseDTO.setId(project.getId());
+                responseDTO.setName(project.getName());
+                responseDTO.setCreatedAt(project.getCreatedAt());
+                return new ResponseEntity<Object>(responseDTO, HttpStatus.CREATED);
+            }catch(Exception e){
+                System.out.println("Failed creating project");
+                return new ResponseEntity("Failed creating", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
+        return new ResponseEntity<>("You are not authorized for this operation",HttpStatus.UNAUTHORIZED);
     }
 
     @DeleteMapping("/delete/{projectId}")
@@ -83,9 +108,7 @@ public class ProjectController {
             List<Project> projects = org.getProjects();
             List<ProjectResponseDTO> responseDTOList = new ArrayList<>();
             for(Project project : projects){
-                ProjectResponseDTO projectResponseDTO = new ProjectResponseDTO();
-                projectResponseDTO.setId(project.getId());
-                projectResponseDTO.setName(project.getName());
+                ProjectResponseDTO projectResponseDTO = mapper.projectResponse(project);
                 responseDTOList.add(projectResponseDTO);
             }
             return new ResponseEntity(responseDTOList,HttpStatus.OK);

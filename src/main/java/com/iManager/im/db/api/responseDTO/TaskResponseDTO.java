@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public class TaskResponseDTO {
     private UUID id;
+    private String ticketId;
     private String title;
     private String description;
     private String status;
@@ -14,13 +15,15 @@ public class TaskResponseDTO {
     }
 
     public TaskResponseDTO(UUID id, String title, String description,
-                           String status, String priority, UserResponseDTO assignedUser) {
+                           String status, String priority, UserResponseDTO assignedUser,
+                           String ticketId) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.status = status;
         this.priority = priority;
         this.assignedUser = assignedUser;
+        this.ticketId = ticketId;
     }
 
     public UUID getId() {
@@ -68,6 +71,18 @@ public class TaskResponseDTO {
     }
 
     public void setAssignedUsers(UserResponseDTO assignedUser) {
+        this.assignedUser = assignedUser;
+    }
+
+    public String getTicketId() {
+        return ticketId;
+    }
+
+    public void setTicketId(String ticketId) {
+        this.ticketId = ticketId;
+    }
+
+    public void setAssignedUser(UserResponseDTO assignedUser) {
         this.assignedUser = assignedUser;
     }
 }
