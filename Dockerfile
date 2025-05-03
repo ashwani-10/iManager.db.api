@@ -5,8 +5,6 @@ WORKDIR /app
 
 COPY . .
 
-RUN mvn clean package -DskipTests
-
 # Step 2: Run Stage (Only JRE, lightweight)
 FROM gcr.io/distroless/java21
 

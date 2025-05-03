@@ -3,6 +3,7 @@ package com.iManager.im.db.api.requestDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.iManager.im.db.api.enums.Role;
 
+import java.util.List;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -14,23 +15,33 @@ public class UserRequestDTO {
     Role role;
     UUID orgId;
     String orgName;
+    List<String> operations;
 
     public UserRequestDTO() {
     }
 
-    public UserRequestDTO(UUID id, String name, String email, String password,
-                          Role role, UUID orgId, String orgName) {
+    public UserRequestDTO(UUID id, String name, String email, String password, Role role,
+                          UUID orgId, String orgName, List<String> operations) {
         this.id = id;
         this.name = name;
-        Email = email;
+        this.Email = email;
         this.password = password;
         this.role = role;
         this.orgId = orgId;
         this.orgName = orgName;
+        this.operations = operations;
     }
 
     public String getOrgName() {
         return orgName;
+    }
+
+    public List<String> getOperations() {
+        return operations;
+    }
+
+    public void setOperations(List<String> operations) {
+        this.operations = operations;
     }
 
     public void setOrgName(String orgName) {

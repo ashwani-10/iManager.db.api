@@ -71,86 +71,101 @@ public class TaskController {
         return new ResponseEntity<>("You are not authorized for this operation",HttpStatus.UNAUTHORIZED);
     }
 
-    @DeleteMapping("/delete/{taskId}")
-    public ResponseEntity deleteTask(@PathVariable UUID taskId){
-        try {
-            Tasks task = taskRepository.findById(taskId)
-                    .orElseThrow(()-> new RuntimeException("Task Does not exists"));
-            taskRepository.delete(task);
-            return new ResponseEntity(HttpStatus.OK);
-        }catch (Exception e){
-            System.out.println("Failed deleting task");
-            return new ResponseEntity("Failed deleting",HttpStatus.INTERNAL_SERVER_ERROR);
+    @DeleteMapping("/delete/{loggedId}/{taskId}")
+    public ResponseEntity deleteTask(@PathVariable String loggedId,
+                                     @PathVariable UUID taskId){
+
+        UUID opId = UUID.fromString("87724c1e-825d-496a-b3ef-7eb0eacbcd3c");
+        Operation operation = operationRepository.findById(opId).orElseThrow();
+
+        if (validateAuth.validateUser(loggedId,operation)) {
+            try {
+                Tasks task = taskRepository.findById(taskId)
+                        .orElseThrow(() -> new RuntimeException("Task Does not exists"));
+                taskRepository.delete(task);
+                return new ResponseEntity(HttpStatus.OK);
+            } catch (Exception e) {
+                System.out.println("Failed deleting task");
+                return new ResponseEntity("Failed deleting", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
+        return new ResponseEntity<>("You are not authorized for this operation",HttpStatus.UNAUTHORIZED);
     }
 
     @PutMapping("/update/{loggedUserName}")
     public ResponseEntity updateTask(@PathVariable String loggedUserName,
                                      @RequestBody TaskRequestDTO reqDTO){
-        try {
-            Tasks tasks = taskRepository.findById(reqDTO.getId())
-                    .orElseThrow(()-> new RuntimeException("Task does not exists"));
-            User user = userRepository.findById(reqDTO.getAssignedUser()).orElseThrow();
 
-            if(!tasks.getAssignedUser().getId().equals(user.getId())){
+        UUID opId = UUID.fromString("c45d5216-1d30-46f5-9ab5-5f56eaaaee17");
+        Operation operation = operationRepository.findById(opId).orElseThrow();
 
-                History history = new History();
-                history.setTicketId(tasks.getTicketId());
-                String message = "Assignee Changed: from "
-                        +(tasks.getAssignedUser().getName()).toUpperCase()
-                        +" to "+user.getName().toUpperCase();
-                tasks.setAssignedUser(user);
-                history.setHistoryMessage(message);
-                history.setUserName(loggedUserName);
-                historyRepo.save(history);
-            }
-            if(!reqDTO.getTitle().isEmpty() && !tasks.getTitle().equals(reqDTO.getTitle())){
-                History history = new History();
-                history.setTicketId(tasks.getTicketId());
-                String message = "Title Changed: from "
-                        +(tasks.getTitle()).toUpperCase()
-                        +" to "+reqDTO.getTitle().toUpperCase();
-                tasks.setTitle(reqDTO.getTitle());
-                history.setHistoryMessage(message);
-                history.setUserName(loggedUserName);
-                historyRepo.save(history);
-            }
-            if(!reqDTO.getDescription().isEmpty() && !tasks.getDescription().equals(reqDTO.getDescription())){
-                tasks.setDescription(reqDTO.getDescription());
-            }
-            if(!tasks.getStatus().getId().equals(reqDTO.getStatusId())){
-                Status status = statusRepository.findById(reqDTO.getStatusId()).orElseThrow();
-                String message = "Status Changed: from "
-                        +(tasks.getStatus().getName()).toUpperCase();
-                tasks.setStatus(status);
-                String statusName = status.getName().toUpperCase();
+        if (validateAuth.validateUser(loggedUserName,operation)) {
+            try {
+                Tasks tasks = taskRepository.findById(reqDTO.getId())
+                        .orElseThrow(() -> new RuntimeException("Task does not exists"));
+                User user = userRepository.findById(reqDTO.getAssignedUser()).orElseThrow();
 
-                History history = new History();
-                history.setTicketId(tasks.getTicketId());
-                message = message +" to "+statusName;
-                history.setHistoryMessage(message);
-                history.setUserName(loggedUserName);
-                historyRepo.save(history);
-            }
-            if(!reqDTO.getPriority().isEmpty() && !tasks.getPriority().equals(Priority.valueOf(reqDTO.getPriority()))){
-                String message = "Priority Changed: from "
-                        +(tasks.getPriority().toString()).toUpperCase();
+                if (!tasks.getAssignedUser().getId().equals(user.getId())) {
 
-                tasks.setPriority(Priority.valueOf(reqDTO.getPriority()));
+                    History history = new History();
+                    history.setTicketId(tasks.getTicketId());
+                    String message = "Assignee Changed: from "
+                            + (tasks.getAssignedUser().getName()).toUpperCase()
+                            + " to " + user.getName().toUpperCase();
+                    tasks.setAssignedUser(user);
+                    history.setHistoryMessage(message);
+                    history.setUserName(loggedUserName);
+                    historyRepo.save(history);
+                }
+                if (!reqDTO.getTitle().isEmpty() && !tasks.getTitle().equals(reqDTO.getTitle())) {
+                    History history = new History();
+                    history.setTicketId(tasks.getTicketId());
+                    String message = "Title Changed: from "
+                            + (tasks.getTitle()).toUpperCase()
+                            + " to " + reqDTO.getTitle().toUpperCase();
+                    tasks.setTitle(reqDTO.getTitle());
+                    history.setHistoryMessage(message);
+                    history.setUserName(loggedUserName);
+                    historyRepo.save(history);
+                }
+                if (!reqDTO.getDescription().isEmpty() && !tasks.getDescription().equals(reqDTO.getDescription())) {
+                    tasks.setDescription(reqDTO.getDescription());
+                }
+                if (!tasks.getStatus().getId().equals(reqDTO.getStatusId())) {
+                    Status status = statusRepository.findById(reqDTO.getStatusId()).orElseThrow();
+                    String message = "Status Changed: from "
+                            + (tasks.getStatus().getName()).toUpperCase();
+                    tasks.setStatus(status);
+                    String statusName = status.getName().toUpperCase();
 
-                History history = new History();
-                history.setTicketId(tasks.getTicketId());
-                message = message +" to "+reqDTO.getPriority().toUpperCase();
-                history.setHistoryMessage(message);
-                history.setUserName(loggedUserName);
-                historyRepo.save(history);
+                    History history = new History();
+                    history.setTicketId(tasks.getTicketId());
+                    message = message + " to " + statusName;
+                    history.setHistoryMessage(message);
+                    history.setUserName(loggedUserName);
+                    historyRepo.save(history);
+                }
+                if (!reqDTO.getPriority().isEmpty() && !tasks.getPriority().equals(Priority.valueOf(reqDTO.getPriority()))) {
+                    String message = "Priority Changed: from "
+                            + (tasks.getPriority().toString()).toUpperCase();
+
+                    tasks.setPriority(Priority.valueOf(reqDTO.getPriority()));
+
+                    History history = new History();
+                    history.setTicketId(tasks.getTicketId());
+                    message = message + " to " + reqDTO.getPriority().toUpperCase();
+                    history.setHistoryMessage(message);
+                    history.setUserName(loggedUserName);
+                    historyRepo.save(history);
+                }
+                taskRepository.save(tasks);
+                return new ResponseEntity<Object>("task updated successfully", HttpStatus.CREATED);
+            } catch (Exception e) {
+                System.out.println("Failed updating task");
+                return new ResponseEntity("Failed updating", HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            taskRepository.save(tasks);
-            return new ResponseEntity<Object>("task updated successfully", HttpStatus.CREATED);
-        }catch (Exception e){
-            System.out.println("Failed updating task");
-            return new ResponseEntity("Failed updating",HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        return new ResponseEntity<>("You are not authorized for this operation",HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/get/{subProjectId}")
