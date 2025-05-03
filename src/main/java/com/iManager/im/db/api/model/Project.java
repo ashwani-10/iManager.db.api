@@ -1,16 +1,17 @@
 package com.iManager.im.db.api.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
-@Data
 public class Project {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
     @Column(nullable = false)
     private String name;
@@ -19,18 +20,60 @@ public class Project {
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
-    @OneToMany(mappedBy = "project")
-    private List<Tasks> tasks;
+    @Column(nullable = false)
+    private Instant createdAt;
 
-    //add users in the project
-    @ManyToMany
-    @JoinTable(name = "members",
-            joinColumns = @JoinColumn(name = "project_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private List<User> members;
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SubProject> subProjects;
 
-    @ManyToOne
-    @JoinColumn(name = "created_by")
-    private User createdBy;
+    public Project(UUID id, String name, Organization organization, Instant createdAt, List<SubProject> subProjects) {
+        this.id = id;
+        this.name = name;
+        this.organization = organization;
+        this.createdAt = createdAt;
+        this.subProjects = subProjects;
+    }
 
+    public Project() {
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+    }
+
+    public List<SubProject> getSubProjects() {
+        return subProjects;
+    }
+
+    public void setSubProjects(List<SubProject> subProjects) {
+        this.subProjects = subProjects;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
 }

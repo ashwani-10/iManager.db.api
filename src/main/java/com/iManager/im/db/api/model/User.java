@@ -2,74 +2,144 @@ package com.iManager.im.db.api.model;
 
 import com.iManager.im.db.api.enums.Role;
 import jakarta.persistence.*;
-import lombok.Data;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
-@Data
 @Table(name ="users")
-public class User implements UserDetails {
+public class User{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false)
     private String name;
     @Column(nullable = false ,unique = true)
     private String email;
     @Column(nullable = false)
     private String password;
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Role role;
+    private boolean isActive = false;
+
+    @OneToMany
+    @JoinTable(
+            name = "user_subProject_roles",
+            joinColumns = @JoinColumn(name = "user_id",unique = false),
+            inverseJoinColumns = @JoinColumn(name = "role_id",unique = false)
+    )
+    @MapKeyColumn(name = "subProject_id",unique = false) // Key column for the map
+    private Map<UUID, Roles> subProjectRole;
 
     @ManyToOne
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
-    @OneToMany(mappedBy = "assignedTo")
+    @OneToMany(mappedBy = "assignedUser")
     List<Tasks> assignedTasks; //  To remove
 
     @ManyToMany(mappedBy = "members")
-    List<Project> projects;
+    List<SubProject> projects;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_"+role.name()));
+    public User(UUID id, String name, String email, String password, Role role,
+                Map<UUID, Roles> subProjectRole, boolean isActive,
+                Organization organization, List<Tasks> assignedTasks,
+                List<SubProject> projects) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.subProjectRole = subProjectRole;
+        this.isActive = isActive;
+        this.organization = organization;
+        this.assignedTasks = assignedTasks;
+        this.projects = projects;
     }
 
-    @Override
+    public User() {
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public List<Tasks> getAssignedTasks() {
+        return assignedTasks;
+    }
+
+    public List<SubProject> getProjects() {
+        return projects;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+    }
+
+    public void setAssignedTasks(List<Tasks> assignedTasks) {
+        this.assignedTasks = assignedTasks;
+    }
+
+    public void setProjects(List<SubProject> projects) {
+        this.projects = projects;
+    }
+
     public String getPassword() {
         return this.password;
     }
 
-    @Override
-    public String getUsername() {
+
+    public String getEmail() {
         return this.email;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
+    public Map<UUID, Roles> getSubProjectRole() {
+        return subProjectRole;
     }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
+    public void setSubProjectRole(Map<UUID, Roles> subProjectRole) {
+        this.subProjectRole = subProjectRole;
     }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
 }
